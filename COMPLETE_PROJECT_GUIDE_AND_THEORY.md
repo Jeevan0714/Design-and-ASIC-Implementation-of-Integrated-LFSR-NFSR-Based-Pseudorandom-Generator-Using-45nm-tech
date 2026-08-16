@@ -16,6 +16,7 @@
 10. [Master PPA Comparison: 45nm vs 130nm](#10-master-ppa-comparison-45nm-vs-130nm)
 11. [Step-by-Step Command Execution Guide](#11-step-by-step-command-execution-guide)
 12. [Viva Questions & Answers Cheat Sheet](#12-viva-questions--answers-cheat-sheet)
+13. [8-Bit Manual Calculation Guide & Web Visualizer App](#13-8-bit-manual-calculation-guide--web-visualizer-app)
 
 ---
 
@@ -744,6 +745,93 @@ bash view_45nm_layout.sh
 
 ### Q5: What is shown in your layout screenshot?
 **Answer:** "The layout screenshot shows a **zoomed-in nanometer-scale view (400nm scale bar) of cell `_2146_`**, which is a **NanGate 45nm `DFF_X1` flip-flop holding Bit 102 of our 128-bit NFSR**. It shows the internal CMOS transistor geometries, **Metal 1 (red)** interconnects, **Metal 2 (green)** horizontal routing tracks, and **Via 1** layer transitions."
+
+---
+
+# 13. 8-Bit Manual Calculation Guide & Web Visualizer App
+
+To manually calculate Grain-128 encryption and decryption in a notebook for your project presentation or viva, here is the complete reference guide.
+
+## 📋 What You Need Before Starting
+1. **Plaintext Character**: Character `'H'` (ASCII = `72` = `0x48`)
+2. **128-bit LFSR Seed L**: `0xACE123456789ABCDEF0123456789ABCE`
+3. **128-bit NFSR Seed N**: `0x123456789ABCDEF0123456789ABCDEF0`
+4. **Core Equations**:
+   - $h(x) = (s_{124} \cdot s_{102}) \oplus (s_{81} \cdot s_{63}) \oplus (s_{57} \cdot b_{118}) \oplus (b_{87} \cdot b_{79}) \oplus (s_{124} \cdot s_{57} \cdot b_{39})$
+   - $Z = h(x) \oplus s_{34} \oplus b_{125} \oplus b_{112} \oplus b_{91} \oplus b_{82} \oplus b_{63} \oplus b_{54} \oplus b_{38}$
+   - XOR rule: $0 \oplus 0 = 0$, $1 \oplus 1 = 0$, $1 \oplus 0 = 1$, $0 \oplus 1 = 1$.
+
+---
+
+## ✍️ Step-by-Step Manual Calculation Flow
+
+### Step 1: Character to 8-Bit Binary Conversion
+Character `'H'` $\rightarrow$ ASCII `72` $\rightarrow$ **`01001000`**
+- $P[7] = 0, P[6] = 1, P[5] = 0, P[4] = 0, P[3] = 1, P[2] = 0, P[1] = 0, P[0] = 0$
+
+### Step 2: Register Bit Lookup (State S0)
+- **LFSR Taps**: $s_{124} = 1, s_{102} = 0, s_{81} = 1, s_{63} = 1, s_{57} = 0, s_{34} = 0$
+- **NFSR Taps**: $b_{125} = 0, b_{118} = 0, b_{112} = 0, b_{91} = 0, b_{87} = 1, b_{79} = 0, b_{63} = 0, b_{54} = 0, b_{39} = 1, b_{38} = 0$
+
+### Step 3: Evaluate h(x) Non-Linear Filter
+1. Term 1: $(1 \cdot 0) = 0$
+2. Term 2: $(1 \cdot 1) = 1$
+3. Term 3: $(0 \cdot 0) = 0$
+4. Term 4: $(1 \cdot 0) = 0$
+5. Term 5: $(1 \cdot 0 \cdot 1) = 0$
+- $h(x) = 0 \oplus 1 \oplus 0 \oplus 0 \oplus 0 = \mathbf{1}$
+
+### Step 4: Compute Keystream Bit Z[7] & Full Keystream Byte Z[7:0]
+- $Z[7] = h(x) \oplus s_{34} \oplus b_{125} \oplus b_{112} \oplus b_{91} \oplus b_{82} \oplus b_{63} \oplus b_{54} \oplus b_{38}$
+- $Z[7] = 1 \oplus 0 \oplus 0 \oplus 0 \oplus 0 \oplus 0 \oplus 0 \oplus 0 \oplus 0 = \mathbf{1}$
+- **Full Keystream Byte $Z[7:0]$**: **`10000000`** (`0x80`)
+
+### Step 5: Bitwise XOR Encryption Table ($C = P \oplus Z$)
+
+| Bit Position | Plaintext Bit ($P$) | Keystream Bit ($Z$) | XOR Calculation | Ciphertext Bit ($C$) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Bit 7 (MSB)** | `0` | `1` | `0 ⊕ 1` | **`1`** |
+| **Bit 6** | `1` | `0` | `1 ⊕ 0` | **`1`** |
+| **Bit 5** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 4** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 3** | `1` | `0` | `1 ⊕ 0` | **`1`** |
+| **Bit 2** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 1** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 0 (LSB)** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+
+- **Plaintext Byte ($P$)**: `01001000` (`0x48`, `'H'`)
+- **Keystream Byte ($Z$)**: `10000000` (`0x80`)
+- **Ciphertext Byte ($C$)**: **`11001000`** (`0xC8`)
+
+### Step 6: Bitwise XOR Decryption Table ($P = C \oplus Z$)
+
+| Bit Position | Ciphertext Bit ($C$) | Keystream Bit ($Z$) | XOR Calculation | Recovered Bit ($P$) |
+| :--- | :---: | :---: | :---: | :---: |
+| **Bit 7 (MSB)** | `1` | `1` | `1 ⊕ 1` | **`0`** |
+| **Bit 6** | `1` | `0` | `1 ⊕ 0` | **`1`** |
+| **Bit 5** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 4** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 3** | `1` | `0` | `1 ⊕ 0` | **`1`** |
+| **Bit 2** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 1** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+| **Bit 0 (LSB)** | `0` | `0` | `0 ⊕ 0` | **`0`** |
+
+- **Recovered Plaintext ($P$)**: `01001000` = `72` = **`'H'`**
+
+---
+
+## 🌐 Running the Interactive Web Visualizer App
+
+An interactive web application is included in `visualizer/`.
+
+```bash
+# 1. Run local web server
+python3 -m http.server 8000 --directory "/home/jeevan/Desktop/my projects/major project/new_lsfr/visualizer"
+
+# 2. Open in browser
+xdg-open http://localhost:8000
+```
+Open **[http://localhost:8000](http://localhost:8000)** to interactively view all 7 steps, inspect $h(x)$ filter terms for any of the 8 bits ($Z[7]$ down to $Z[0]$), and view the **Official Grain-128 Fixed Tap Specification Popup Modal**.
 
 ---
 
