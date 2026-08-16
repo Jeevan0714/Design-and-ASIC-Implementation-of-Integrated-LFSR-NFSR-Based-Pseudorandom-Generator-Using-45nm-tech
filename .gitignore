@@ -4,7 +4,7 @@
 sim_*
 sim
 
-# Synthesis & Tool Logs
+# Synthesis & Tool Logs & History
 *.log
 *.log.*
 *.rpt
@@ -12,6 +12,12 @@ sim
 *.cmd.*
 *.jou
 *.pb
+.history_*
+*.def
+
+# Libraries & Big Binary Data
+*.lib
+*.lef
 
 # Output Build Directories
 /results/
