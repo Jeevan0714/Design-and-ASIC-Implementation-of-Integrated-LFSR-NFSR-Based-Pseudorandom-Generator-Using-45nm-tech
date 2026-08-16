@@ -11,7 +11,38 @@
 | Document | Description |
 |:---|:---|
 | **[COMPLETE_PROJECT_GUIDE_AND_THEORY.md](COMPLETE_PROJECT_GUIDE_AND_THEORY.md)** | Full deep-dive: theory, math, code walkthrough, layout analysis, viva Q&A |
-| **[README.md](README.md)** | This file — project overview, results, and quick-start commands |
+| **[README.md](README.md)** | This file — project overview, results, visualizer app, and quick-start commands |
+| **[visualizer/](visualizer/)** | Interactive Web Application — 8-Bit Step-by-Step Encryption & Decryption Guide |
+
+---
+
+## 🌐 Interactive Web Application & Manual Calculation Guide
+
+We have created an interactive web application in [`visualizer/`](visualizer/) designed specifically for project presentations, demonstrations, and viva preparation.
+
+### 🌟 Features of the Web App:
+1. **8-Bit Single-Character Manual Mode**: Process 1 character at a time (e.g. `'H'`) to follow every calculation step by step.
+2. **Text to 8-Bit Binary Converter**: Shows ASCII value (`72`), Hex (`0x48`), and Binary (`01001000`) mapped to `P[7]` down to `P[0]`.
+3. **Register Tap Extraction**: Displays exact bit values for `s124, s102, s81, s63, s57, s34` and `b125, b118, b112, b91, b87, b79, b63, b54, b39, b38`.
+4. **Interactive 8-Bit Keystream Inspector (Z[7] to Z[0])**:
+   - Inspect $h(x)$ filter function & 5 evaluated AND-terms for any of the 8 unrolled bits.
+   - Computes $Z[k] = h(x) \oplus \text{linear taps}$.
+5. **Interactive 8-Bit Bitwise XOR Tables**:
+   - **Encryption Table**: $C[k] = P[k] \oplus Z[k]$ for Bits 7 down to 0.
+   - **Decryption Table**: $P[k] = C[k] \oplus Z[k]$ verifying recovery of original character.
+6. **Pop-up Tap Reference Table**: Displays the official ECRYPT Grain-128 fixed tap specification for LFSR, NFSR, $h(x)$, and linear output taps.
+
+### 🚀 Running the Web Application:
+To run and view the visualizer web app in your browser:
+
+```bash
+# 1. Start local web server (runs on port 8000)
+python3 -m http.server 8000 --directory "/home/jeevan/Desktop/my projects/major project/new_lsfr/visualizer"
+
+# 2. Open in your default browser
+xdg-open http://localhost:8000
+```
+Or simply open **[http://localhost:8000](http://localhost:8000)** in Chrome/Firefox.
 
 ---
 
@@ -102,6 +133,11 @@ new_lsfr/
 │   ├── openroad_45nm_full_chip.png          Full routed chip (45nm)
 │   ├── openroad_45nm_dff_cell_layout.png    Zoomed DFF_X1 cell (NFSR bit 102)
 │   └── openroad_130nm_full_chip.png         Baseline 130nm chip
+│
+├── visualizer/                              ← Interactive Step-by-Step Web Application
+│   ├── index.html                           7-Step Page-by-Page HTML Walkthrough
+│   ├── style.css                            Dark-mode glassmorphic CSS design system
+│   └── app.js                               Grain-128 8-bit manual calculation JS engine
 │
 ├── view_45nm_layout.sh                      Open 45nm layout in OpenROAD GUI
 └── view_130nm_layout.sh                     Open 130nm layout in OpenROAD GUI

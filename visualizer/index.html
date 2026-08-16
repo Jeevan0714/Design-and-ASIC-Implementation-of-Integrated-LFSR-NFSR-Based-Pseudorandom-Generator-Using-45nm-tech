@@ -1,0 +1,448 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Grain-128 Cipher — 8-Bit Step-by-Step Manual Calculation</title>
+    <meta name="description" content="Step-by-step manual calculation walkthrough for 8-bit single character Grain-128 encryption and decryption.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Fira+Code:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="app">
+
+        <!-- Top Bar -->
+        <div class="topbar">
+            <div class="topbar-brand">
+                <span class="logo">✍️</span>
+                <h1>Grain-128 Manual Calculation Guide (8-Bit Byte Level)</h1>
+            </div>
+            <div class="topbar-badges">
+                <span class="tbadge tbadge-cyan">1 CHARACTER (8 BITS)</span>
+                <span class="tbadge tbadge-purple">MANUAL FLOW</span>
+            </div>
+        </div>
+
+        <!-- Step Progress Bar -->
+        <div class="progress-bar" id="progress-bar">
+            <!-- Built by JS -->
+        </div>
+
+        <!-- Page Content (one page visible at a time) -->
+        <div class="page-container" id="page-container">
+
+            <!-- PAGE 1: Input Single Character -->
+            <div class="page active" id="page-1">
+                <div class="page-head">
+                    <h2>📝 Step 1: Input 1 Character (8 Bits)</h2>
+                    <p>Enter a single character to see its exact step-by-step manual derivation</p>
+                </div>
+                <div class="card">
+                    <div class="info-box">
+                        <strong>Manual Calculation Mode:</strong> Rather than processing 16 bytes at once, this guide focuses on <strong>1 character (8 bits)</strong> so you can follow along on paper and present it in your viva!
+                    </div>
+                    <div style="display: flex; gap: 16px; align-items: center;">
+                        <input type="text" id="message-input" class="msg-input" style="max-width: 160px; text-align: center; font-size: 2rem;" maxlength="1" value="H" autocomplete="off" spellcheck="false">
+                        <div>
+                            <div style="font-size: 1.1rem; font-weight: 700;" id="char-summary-title">Character 'H'</div>
+                            <div style="font-size: 0.85rem; color: var(--text-secondary);" id="char-summary-sub">ASCII: 72 | Hex: 0x48 | Binary: 01001000</div>
+                        </div>
+                    </div>
+                    <div class="input-meta" style="margin-top: 20px;">
+                        <span class="counter full" id="counter">1 Character → 8 Bits</span>
+                        <div class="presets">
+                            <button class="preset" onclick="loadPreset('H')">'H' (0x48)</button>
+                            <button class="preset" onclick="loadPreset('A')">'A' (0x41)</button>
+                            <button class="preset" onclick="loadPreset('Z')">'Z' (0x5A)</button>
+                            <button class="preset" onclick="loadPreset('9')">'9' (0x39)</button>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <div class="spacer"></div>
+                    <button class="nav-btn next" onclick="goToStep(2)">Next: 8-Bit Binary Breakdown →</button>
+                </div>
+            </div>
+
+            <!-- PAGE 2: Text to 8-bit Binary -->
+            <div class="page" id="page-2">
+                <div class="page-head">
+                    <h2>🔢 Step 2: Convert Character to 8-Bit Binary</h2>
+                    <p>Character ASCII Code → 8-bit binary vector (P[7] to P[0])</p>
+                </div>
+                <div class="card">
+                    <div class="info-box">
+                        For character <strong id="step2-char-name">'H'</strong>: ASCII code = <strong id="step2-ascii">72</strong> (Hex: <strong id="step2-hex">0x48</strong>). Converting to 8-bit binary yields <strong id="step2-bin">01001000</strong>.
+                    </div>
+
+                    <div style="margin-top: 16px;">
+                        <table class="bit-table" style="max-width: 600px; margin: 0 auto;">
+                            <thead>
+                                <tr>
+                                    <th>Bit Index</th>
+                                    <th>P[7] (MSB)</th>
+                                    <th>P[6]</th>
+                                    <th>P[5]</th>
+                                    <th>P[4]</th>
+                                    <th>P[3]</th>
+                                    <th>P[2]</th>
+                                    <th>P[1]</th>
+                                    <th>P[0] (LSB)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr id="step2-table-row">
+                                    <!-- Populated by JS -->
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="nav-btn" onclick="goToStep(1)">← Back</button>
+                    <button class="nav-btn next" onclick="goToStep(3)">Next: Extract State Taps →</button>
+                </div>
+            </div>
+
+            <!-- PAGE 3: Extract Taps -->
+            <div class="page" id="page-3">
+                <div class="page-head">
+                    <h2>🔑 Step 3: Extract Tap Values from Initial Seeds (L & N)</h2>
+                    <p>Read required bit indices from 128-bit LFSR (L) and NFSR (N) registers</p>
+                </div>
+                <div class="card">
+                    <div class="info-box">
+                        Grain-128 specifies exact tap positions in the registers. Look up these bit indices in initial seed <strong>L = 0xACE1...</strong> and <strong>N = 0x1234...</strong>:
+                    </div>
+
+                    <!-- Trigger Button for Popup Modal -->
+                    <div style="margin-bottom: 16px; text-align: center;">
+                        <button class="nav-btn primary" onclick="toggleTapModal(true)" style="background: linear-gradient(135deg, rgba(168, 85, 247, 0.25), rgba(56, 189, 248, 0.25)); border-color: var(--purple);">
+                            📖 View Complete Fixed Grain-128 Tap Specification Table (Click to Popup)
+                        </button>
+                    </div>
+
+                    <div class="reg-block reveal-item" id="reveal-lfsr">
+                        <div class="reg-title lfsr">📘 LFSR State Taps (s array) for State S0</div>
+                        <div class="deriv-eval" id="lfsr-tap-list">
+                            s124 = 1 | s102 = 0 | s81 = 1 | s63 = 1 | s57 = 0 | s34 = 0
+                        </div>
+                    </div>
+
+                    <div class="reg-block reveal-item" id="reveal-nfsr">
+                        <div class="reg-title nfsr">📙 NFSR State Taps (b array) for State S0</div>
+                        <div class="deriv-eval" id="nfsr-tap-list">
+                            b125 = 0 | b118 = 0 | b112 = 0 | b91 = 0 | b87 = 1 | b79 = 0 | b63 = 0 | b54 = 0 | b39 = 1 | b38 = 0
+                        </div>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="nav-btn" onclick="goToStep(2)">← Back</button>
+                    <button class="nav-btn next" onclick="goToStep(4)">Next: Compute h(x) Filter →</button>
+                </div>
+            </div>
+
+            <!-- PAGE 4: Compute h(x) and Z[7:0] -->
+            <div class="page" id="page-4">
+                <div class="page-head">
+                    <h2>⚙️ Step 4: Compute Non-Linear h(x) & Keystream Byte Z[7:0]</h2>
+                    <p>Select any bit below to inspect its h(x) filter terms and derivation</p>
+                </div>
+                <div class="card">
+                    <!-- Interactive Bit Selector Row for 8 unrolled bits -->
+                    <div style="margin-bottom: 20px;">
+                        <div class="deriv-label" style="margin-bottom: 8px;">Select Bit to Inspect (Z[7] down to Z[0]):</div>
+                        <div class="presets" id="step4-bit-selector" style="gap: 6px;">
+                            <!-- Populated by JS -->
+                        </div>
+                    </div>
+
+                    <div class="deriv-panel reveal-item">
+                        <h3 id="step4-deriv-title">🔬 Step-by-Step Keystream Derivation for Z[7] (State S0)</h3>
+
+                        <div class="deriv-step">
+                            <div class="deriv-label">1. h(x) Non-Linear Filter Function Formula</div>
+                            <div class="deriv-code">h(x) = (s124 · s102) ⊕ (s81 · s63) ⊕ (s57 · b118) ⊕ (b87 · b79) ⊕ (s124 · s57 · b39)</div>
+                        </div>
+
+                        <div class="deriv-step">
+                            <div class="deriv-label">2. Evaluate 5 AND-Product Terms & h(x) Result</div>
+                            <div class="deriv-eval" id="hx-terms-eval">
+                                Term 1: (1·0) = 0 | Term 2: (1·1) = 1 | Term 3: (0·0) = 0 | Term 4: (1·0) = 0 | Term 5: (1·0·1) = 0
+                            </div>
+                            <div class="deriv-eval" id="hx-final-eval">
+                                h(x) = 0 ⊕ 1 ⊕ 0 ⊕ 0 ⊕ 0 = 1
+                            </div>
+                        </div>
+
+                        <div class="deriv-step">
+                            <div class="deriv-label">3. Computed Keystream Bit Z[k] (h(x) ⊕ 8 Linear Taps)</div>
+                            <div class="deriv-code">Z = h(x) ⊕ s34 ⊕ b125 ⊕ b112 ⊕ b91 ⊕ b82 ⊕ b63 ⊕ b54 ⊕ b38</div>
+                            <div class="deriv-eval" id="z7-final-eval">
+                                Z[7] = 1 ⊕ 0 ⊕ 0 ⊕ 0 ⊕ 0 ⊕ 0 ⊕ 0 ⊕ 0 ⊕ 0 = 1
+                            </div>
+                        </div>
+
+                        <div class="deriv-step">
+                            <div class="deriv-result" id="full-zbyte-result">
+                                Full 8-Bit Keystream Byte Z[7:0] = 10000000 (0x80)
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="nav-btn" onclick="goToStep(3)">← Back</button>
+                    <button class="nav-btn next" onclick="goToStep(5)">Next: 8-Bit XOR Encryption →</button>
+                </div>
+            </div>
+
+            <!-- PAGE 5: 8-Bit XOR Encryption -->
+            <div class="page" id="page-5">
+                <div class="page-head">
+                    <h2>🔒 Step 5: Bitwise XOR Encryption (C = P ⊕ Z)</h2>
+                    <p>Bit-by-bit XOR table of 8 Plaintext bits with 8 Keystream bits</p>
+                </div>
+                <div class="card">
+                    <div class="info-box">
+                        Apply XOR rule: <strong>0 ⊕ 0 = 0</strong>, <strong>1 ⊕ 1 = 0</strong>, <strong>1 ⊕ 0 = 1</strong>, <strong>0 ⊕ 1 = 1</strong>.
+                    </div>
+
+                    <div style="overflow-x: auto; margin-top: 16px;">
+                        <table class="bit-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Bit Position</th>
+                                    <th>Plaintext Bit (P)</th>
+                                    <th>Keystream Bit (Z)</th>
+                                    <th>XOR Calculation</th>
+                                    <th>Ciphertext Bit (C)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="enc-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="nav-btn" onclick="goToStep(4)">← Back</button>
+                    <button class="nav-btn next" onclick="goToStep(6)">Next: See Ciphertext Result →</button>
+                </div>
+            </div>
+
+            <!-- PAGE 6: Ciphertext Result -->
+            <div class="page" id="page-6">
+                <div class="page-head">
+                    <h2>🔴 Step 6: Ciphertext Result</h2>
+                    <p>8-bit encrypted byte generated from character</p>
+                </div>
+                <div class="card">
+                    <div class="cipher-strip" id="cipher-hex-val">0xC8</div>
+                    <div class="cipher-bin" id="cipher-bin-val">11001000</div>
+                    <div class="compare">
+                        <div class="cmp-box orig">
+                            <div class="cl">Original Plaintext Character</div>
+                            <div class="cv" id="cmp-orig-val">'H' (0x48 = 01001000)</div>
+                        </div>
+                        <div class="cmp-arrow">→</div>
+                        <div class="cmp-box enc">
+                            <div class="cl">Encrypted Ciphertext Byte</div>
+                            <div class="cv" id="cmp-enc-val">0xC8 (11001000)</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="nav-btn" onclick="goToStep(5)">← Back</button>
+                    <button class="nav-btn next" onclick="goToStep(7)">Next: 8-Bit XOR Decryption →</button>
+                </div>
+            </div>
+
+            <!-- PAGE 7: 8-Bit XOR Decryption -->
+            <div class="page" id="page-7">
+                <div class="page-head">
+                    <h2>🟢 Step 7: Bitwise XOR Decryption (P = C ⊕ Z)</h2>
+                    <p>Apply exact same keystream to recover original character</p>
+                </div>
+                <div class="card">
+                    <div class="info-box">
+                        XOR is self-inverse: <strong>(P ⊕ Z) ⊕ Z = P</strong>. XORing Ciphertext C with Keystream Z recovers Plaintext P!
+                    </div>
+
+                    <div style="overflow-x: auto; margin-top: 16px;">
+                        <table class="bit-table" style="width: 100%;">
+                            <thead>
+                                <tr>
+                                    <th>Bit Position</th>
+                                    <th>Ciphertext Bit (C)</th>
+                                    <th>Keystream Bit (Z)</th>
+                                    <th>XOR Calculation</th>
+                                    <th>Recovered Bit (P)</th>
+                                </tr>
+                            </thead>
+                            <tbody id="dec-table-body">
+                                <!-- Populated by JS -->
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="success reveal-item" id="success-banner">
+                        <div class="si">✅</div>
+                        <div class="st">Decryption Successful!</div>
+                        <div class="ss">Recovered Plaintext Byte: <strong id="rec-hex-val">0x48</strong> (<span id="rec-bin-val">01001000</span>)</div>
+                        <div class="sr" id="recovered-msg">'H'</div>
+                    </div>
+                </div>
+                <div class="page-footer">
+                    <button class="nav-btn" onclick="goToStep(6)">← Back</button>
+                    <button class="nav-btn next" onclick="goToStep(1)">⏮ Start Over</button>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- Footer -->
+        <footer class="app-footer">
+            <p>Grain-128 8-Bit Manual Calculation Visualizer • NanGate 45nm ASIC</p>
+            <p class="team">Jeevan R • Navyashree S • Pallavi Y • Kushal N S — DBIT ECE</p>
+        </footer>
+
+    </div>
+
+    <!-- POPUP MODAL: COMPLETE GRAIN-128 FIXED TAP REFERENCE TABLE -->
+    <div id="tap-modal-overlay" class="modal-overlay" onclick="if(event.target===this) toggleTapModal(false)">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>📖 Official Grain-128 Standard Fixed Tap Specification Table</h3>
+                <button class="modal-close-btn" onclick="toggleTapModal(false)">✖ Close</button>
+            </div>
+            <div class="modal-body">
+                <div class="info-box">
+                    <strong>Fixed Architecture Notice:</strong> These bit tap indices are defined by the Grain-128 cryptographic standard (ECRYPT Stream Cipher Project). In your <strong>NanGate 45nm ASIC hardware RTL</strong>, these indices are physical copper wires connected directly to the combinational AND/XOR logic gates. They are <strong>100% fixed</strong> and do not change.
+                </div>
+
+                <!-- Table 1: LFSR Feedback Polynomial Taps -->
+                <div class="deriv-step">
+                    <div class="deriv-label">1. LFSR Feedback Polynomial Taps (6 Taps)</div>
+                    <div class="deriv-code">L_fb = s127 ⊕ s120 ⊕ s89 ⊕ s57 ⊕ s46 ⊕ s31</div>
+                    <table class="bit-table" style="margin-top: 8px;">
+                        <thead>
+                            <tr>
+                                <th>Term</th>
+                                <th>Tap 1</th>
+                                <th>Tap 2</th>
+                                <th>Tap 3</th>
+                                <th>Tap 4</th>
+                                <th>Tap 5</th>
+                                <th>Tap 6</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Index</strong></td>
+                                <td><span class="b1">s127</span></td>
+                                <td><span class="b1">s120</span></td>
+                                <td><span class="b1">s89</span></td>
+                                <td><span class="b1">s57</span></td>
+                                <td><span class="b1">s46</span></td>
+                                <td><span class="b1">s31</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table 2: NFSR Feedback Polynomial Taps -->
+                <div class="deriv-step" style="margin-top: 16px;">
+                    <div class="deriv-label">2. NFSR Feedback Polynomial Taps (6 Linear Taps + 7 Quadratic Terms)</div>
+                    <div class="deriv-code">N_fb = s127 ⊕ b127 ⊕ b101 ⊕ b71 ⊕ b36 ⊕ b31 ⊕ (b124·b60) ⊕ (b116·b114) ⊕ (b110·b109) ⊕ (b100·b68) ⊕ (b87·b79) ⊕ (b66·b62) ⊕ (b59·b43)</div>
+                    <table class="bit-table" style="margin-top: 8px;">
+                        <thead>
+                            <tr>
+                                <th>Type</th>
+                                <th>Linear Taps</th>
+                                <th>Nonlinear Taps (AND Pairs)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Taps</strong></td>
+                                <td>s127, b127, b101, b71, b36, b31</td>
+                                <td>(b124·b60), (b116·b114), (b110·b109), (b100·b68), (b87·b79), (b66·b62), (b59·b43)</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table 3: Non-Linear Filter Function h(x) Taps -->
+                <div class="deriv-step" style="margin-top: 16px;">
+                    <div class="deriv-label">3. Non-Linear Filter Function h(x) Taps (9 Taps in 5 Terms)</div>
+                    <div class="deriv-code">h(x) = (s124 · s102) ⊕ (s81 · s63) ⊕ (s57 · b118) ⊕ (b87 · b79) ⊕ (s124 · s57 · b39)</div>
+                    <table class="bit-table" style="margin-top: 8px;">
+                        <thead>
+                            <tr>
+                                <th>AND Term</th>
+                                <th>Formula</th>
+                                <th>Sampled Register Taps</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Term 1</strong></td>
+                                <td>(x0 · x1)</td>
+                                <td><span class="b1">s124</span>, <span class="b1">s102</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Term 2</strong></td>
+                                <td>(x2 · x3)</td>
+                                <td><span class="b1">s81</span>, <span class="b1">s63</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Term 3</strong></td>
+                                <td>(x4 · x5)</td>
+                                <td><span class="b1">s57</span>, <span class="bd">b118</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Term 4</strong></td>
+                                <td>(x6 · x7)</td>
+                                <td><span class="bd">b87</span>, <span class="bd">b79</span></td>
+                            </tr>
+                            <tr>
+                                <td><strong>Term 5</strong></td>
+                                <td>(x0 · x4 · x8)</td>
+                                <td><span class="b1">s124</span>, <span class="b1">s57</span>, <span class="bd">b39</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Table 4: Linear Output Taps -->
+                <div class="deriv-step" style="margin-top: 16px;">
+                    <div class="deriv-label">4. Linear Output State Taps for Keystream Bit Z (8 Taps)</div>
+                    <div class="deriv-code">Z = h(x) ⊕ s34 ⊕ b125 ⊕ b112 ⊕ b91 ⊕ b82 ⊕ b63 ⊕ b54 ⊕ b38</div>
+                    <table class="bit-table" style="margin-top: 8px;">
+                        <thead>
+                            <tr>
+                                <th>Target Bit</th>
+                                <th>Filter Result</th>
+                                <th>LFSR Linear Tap</th>
+                                <th>NFSR Linear Taps (7 Taps)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>Z</strong></td>
+                                <td>h(x)</td>
+                                <td><span class="b1">s34</span></td>
+                                <td><span class="bd">b125</span>, <span class="bd">b112</span>, <span class="bd">b91</span>, <span class="bd">b82</span>, <span class="bd">b63</span>, <span class="bd">b54</span>, <span class="bd">b38</span></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
