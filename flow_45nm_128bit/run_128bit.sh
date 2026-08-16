@@ -41,8 +41,13 @@ echo -e "${GREEN}✓ Synthesis Completed! Netlist → flow_45nm_128bit/results/s
 # ── Step 3: OpenROAD Place & Route ───────────────────────────────────────────
 echo -e "${YELLOW}[3/4] Running OpenROAD Place & Route (45nm Layout)...${NC}"
 if command -v docker &> /dev/null; then
+    VLSI_LIB_DIR="$HOME/vlsi_libraries"
+    if [ ! -d "$VLSI_LIB_DIR" ]; then
+        VLSI_LIB_DIR="/home/jeevan/vlsi_libraries"
+    fi
     docker run --rm \
         -v "$PWD":/work \
+        -v "$VLSI_LIB_DIR":/work/vlsi_libraries \
         -w /work \
         efabless/openlane:2023.09.07 \
         openroad flow_45nm_128bit/openroad_pnr_128bit.tcl
