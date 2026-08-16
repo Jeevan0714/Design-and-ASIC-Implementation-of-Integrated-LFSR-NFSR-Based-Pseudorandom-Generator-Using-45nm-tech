@@ -23,19 +23,12 @@ echo "Loading 45nm layout: $DEF_FILE"
 # Allow local X11 display connection from Docker container
 xhost +local:root >/dev/null 2>&1 || xhost + >/dev/null 2>&1
 
-# Detect VLSI library path (either in user home or /home/jeevan/vlsi_libraries)
-VLSI_LIB_DIR="$HOME/vlsi_libraries"
-if [ ! -d "$VLSI_LIB_DIR" ]; then
-    VLSI_LIB_DIR="/home/jeevan/vlsi_libraries"
-fi
-
 # Launch OpenROAD GUI inside Docker with the 45nm NanGate layout
 docker run --rm -it \
     --net=host \
     -e DISPLAY="$DISPLAY" \
     -v /tmp/.X11-unix:/tmp/.X11-unix \
     -v "$SCRIPT_DIR":/work \
-    -v "$VLSI_LIB_DIR":/work/vlsi_libraries \
     -w /work \
     "$IMAGE_NAME" \
     openroad -gui "$GUI_TCL"
