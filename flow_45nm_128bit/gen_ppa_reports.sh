@@ -17,7 +17,7 @@ GREEN='\033[0;32m'; YELLOW='\033[1;33m'; BLUE='\033[0;34m'; NC='\033[0m'
 SCRIPT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 cd "$SCRIPT_DIR/.."
 
-LIB="/home/jeevan/vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib"
+LIB="vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib"
 NETLIST="flow_45nm_128bit/results/synth_netlist_128bit.v"
 SDC="flow_45nm_128bit/constraints.sdc"
 RPT="flow_45nm_128bit/reports"

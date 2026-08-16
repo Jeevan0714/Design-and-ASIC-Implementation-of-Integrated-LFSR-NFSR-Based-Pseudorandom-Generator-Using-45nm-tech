@@ -303,7 +303,7 @@ yosys -s flow_45nm_128bit/synth_128bit.ys
 # Step 4: Place & Route (OpenROAD via Docker)
 docker run --rm \
     -v "$PWD":/work \
-    -v /home/jeevan/vlsi_libraries:/home/jeevan/vlsi_libraries \
+    -v vlsi_libraries:vlsi_libraries \
     -w /work \
     efabless/openlane:2023.09.07 \
     openroad flow_45nm_128bit/openroad_pnr_128bit.tcl
