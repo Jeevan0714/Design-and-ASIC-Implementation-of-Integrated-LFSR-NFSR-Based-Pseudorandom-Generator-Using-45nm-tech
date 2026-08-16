@@ -43,7 +43,6 @@ echo -e "${YELLOW}[3/4] Running OpenROAD Place & Route (45nm Layout)...${NC}"
 if command -v docker &> /dev/null; then
     docker run --rm \
         -v "$PWD":/work \
-        -v vlsi_libraries:vlsi_libraries \
         -w /work \
         efabless/openlane:2023.09.07 \
         openroad flow_45nm_128bit/openroad_pnr_128bit.tcl
