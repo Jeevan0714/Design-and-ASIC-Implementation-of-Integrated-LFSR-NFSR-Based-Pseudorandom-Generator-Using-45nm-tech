@@ -130,9 +130,11 @@ new_lsfr/
 │   └── results/                             DEF, GDS, netlist, waveforms, STA
 │
 ├── docs/images/                             ← OpenROAD layout screenshots
-│   ├── openroad_45nm_full_chip.png          Full routed chip (45nm)
-│   ├── openroad_45nm_dff_cell_layout.png    Zoomed DFF_X1 cell (NFSR bit 102)
-│   └── openroad_130nm_full_chip.png         Baseline 130nm chip
+│   ├── openroad_45nm_full_chip.png          Full routed chip layout (45nm NanGate)
+│   ├── openroad_45nm_gui_overview.png       OpenROAD GUI environment & Inspector overview
+│   ├── openroad_45nm_cell_rows.png          Zoomed standard cell rows & power grid
+│   ├── openroad_45nm_pins_timing.png        Top I/O signal pins & OpenSTA timing tab
+│   └── openroad_45nm_zoomed_gate_detail.png Zoomed gate layout (MUX2_X1 cell & metal routing)
 │
 ├── visualizer/                              ← Interactive Step-by-Step Web Application
 │   ├── index.html                           7-Step Page-by-Page HTML Walkthrough
@@ -197,17 +199,16 @@ Result     : *** ALL 16 BYTES VERIFIED PASS ***
 ```
 
 ---
-
 ## 📐 Silicon Layout (OpenROAD GUI)
 
-### NanGate 45nm — Full Chip View (Routed Layout)
-![45nm Full Chip Routed Layout](docs/images/openroad_45nm_full_chip.png)
+### 1. NanGate 45nm — Full Chip View (Routed Layout)
+![45nm Full Chip Routed Layout](./docs/images/openroad_45nm_full_chip.png)
 
-### NanGate 45nm — Zoomed In (DFF_X1 Cell — NFSR Bit 102)
-![45nm DFF Standard Cell Zoomed](docs/images/openroad_45nm_dff_cell_layout.png)
+### 2. OpenROAD GUI Environment Overview
+![OpenROAD GUI Overview](./docs/images/openroad_45nm_gui_overview.png)
 
-### SkyWater 130nm — Full Chip View (Baseline Reference)
-![130nm Full Chip Layout](docs/images/openroad_130nm_full_chip.png)
+### 3. Detailed Gate & Routing Metal Layers (`MUX2_X1` Instance)
+![Zoomed Gate Layout and Routing](./docs/images/openroad_45nm_zoomed_gate_detail.png)
 
 ---
 
@@ -227,25 +228,61 @@ Result     : *** ALL 16 BYTES VERIFIED PASS ***
 
 ## 🚀 Quick Execution Guide
 
-All commands run from the project root:
+### IMPORTANT: Terminal Working Directory
+Make sure your terminal is in the project root folder **`new_lsfr`**:
+
 ```bash
 cd "/home/jeevan/Desktop/my projects/major project/new_lsfr"
 ```
 
-### Option 1 — 1-Click Full Flow (Simulation + Synthesis + P&R + STA)
+---
+
+### Option 1 — 1-Click Full ASIC Flow (Simulation + Synthesis + P&R + STA)
+Run from project root `new_lsfr`:
 ```bash
+cd "/home/jeevan/Desktop/my projects/major project/new_lsfr"
 bash flow_45nm_128bit/run_128bit.sh
 ```
 
+---
+
 ### Option 2 — Generate All PPA Reports (Area + Timing + Power)
+Run from project root `new_lsfr`:
 ```bash
+cd "/home/jeevan/Desktop/my projects/major project/new_lsfr"
 bash flow_45nm_128bit/gen_ppa_reports.sh
 ```
-Outputs to `flow_45nm_128bit/reports/synthesis/` and `flow_45nm_128bit/reports/signoff/`
+Outputs report files to `flow_45nm_128bit/reports/synthesis/` and `flow_45nm_128bit/reports/signoff/`.
 
-### Option 3 — Step by Step
+---
+
+### Option 3 — View Silicon Layout in OpenROAD GUI
+`view_45nm_layout.sh` is located in the root `new_lsfr` folder:
+```bash
+cd "/home/jeevan/Desktop/my projects/major project/new_lsfr"
+bash view_45nm_layout.sh
+```
+
+---
+
+### Option 4 — If You Are Already Inside `flow_45nm_128bit/`
+If your terminal current directory is `new_lsfr/flow_45nm_128bit`:
+```bash
+# If you are inside flow_45nm_128bit, run scripts directly without the prefix:
+bash run_128bit.sh
+bash gen_ppa_reports.sh
+
+# To view the layout from inside flow_45nm_128bit:
+bash ../view_45nm_layout.sh
+```
+
+---
+
+### Option 5 — Step-by-Step Command Execution (From `new_lsfr` Root)
 
 ```bash
+cd "/home/jeevan/Desktop/my projects/major project/new_lsfr"
+
 # Step 1: RTL Simulation (Icarus Verilog)
 iverilog -o flow_45nm_128bit/results/sim_128bit \
     flow_45nm_128bit/rtl/LFSR.v \
@@ -257,7 +294,7 @@ iverilog -o flow_45nm_128bit/results/sim_128bit \
     flow_45nm_128bit/tb/tb_lfsr_nfsr.v
 vvp flow_45nm_128bit/results/sim_128bit
 
-# Step 2: View Waveforms
+# Step 2: View Signal Waveforms (GTKWave)
 gtkwave flow_45nm_128bit/results/wave_128bit.vcd &
 
 # Step 3: Logic Synthesis (Yosys → NanGate 45nm)
@@ -271,7 +308,7 @@ docker run --rm \
     efabless/openlane:2023.09.07 \
     openroad flow_45nm_128bit/openroad_pnr_128bit.tcl
 
-# Step 5: Static Timing Analysis
+# Step 5: Static Timing Analysis (OpenSTA)
 sta flow_45nm_128bit/sta_128bit.tcl
 
 # Step 6: Generate All PPA Reports
@@ -284,3 +321,4 @@ bash view_45nm_layout.sh
 ---
 
 > 💡 For detailed theory, math, RTL code walkthrough, layout image explanation, and viva Q&A — see **[COMPLETE_PROJECT_GUIDE_AND_THEORY.md](COMPLETE_PROJECT_GUIDE_AND_THEORY.md)**
+
