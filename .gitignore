@@ -16,8 +16,8 @@ sim
 *.def
 
 # Libraries & Big Binary Data
-*.lib
-*.lef
+!vlsi_libraries/
+!vlsi_libraries/**
 
 # Output Build Directories
 /results/
