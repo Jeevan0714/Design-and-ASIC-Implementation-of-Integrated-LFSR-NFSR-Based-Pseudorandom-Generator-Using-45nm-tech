@@ -89,9 +89,11 @@ new_lsfr/
 │   └── ... (bit-serial, for PPA comparison only)
 │
 ├── docs/images/                        ← OpenROAD layout screenshots
-│   ├── openroad_45nm_dff_cell_layout.png
-│   ├── openroad_45nm_full_chip.png
-│   └── openroad_130nm_full_chip.png
+│   ├── openroad_45nm_full_chip.png         Full routed chip layout (45nm NanGate)
+│   ├── openroad_45nm_gui_overview.png      OpenROAD GUI environment & Inspector overview
+│   ├── openroad_45nm_cell_rows.png         Zoomed standard cell rows & power grid
+│   ├── openroad_45nm_pins_timing.png       Top I/O signal pins & OpenSTA timing tab
+│   └── openroad_45nm_zoomed_gate_detail.png Zoomed gate layout (MUX2_X1 cell & metal routing)
 │
 ├── view_45nm_layout.sh                 Open 45nm routed layout in OpenROAD GUI
 └── view_130nm_layout.sh                Open 130nm layout in OpenROAD GUI
@@ -438,7 +440,7 @@ write_def flow_45nm_128bit/results/lfsr_nfsr_top_45nm.def
 
 ### 8.1 NanGate 45nm — Full Chip View (Routed Layout)
 
-![45nm Full Chip Routed Layout](docs/images/openroad_45nm_full_chip.png)
+![45nm Full Chip Routed Layout](./docs/images/openroad_45nm_full_chip.png)
 
 This view shows the **complete chip die** with all 1,106 standard cells placed and all metal routing layers visible:
 
@@ -449,60 +451,43 @@ This view shows the **complete chip die** with all 1,106 standard cells placed a
 | Blue mesh overlay | `metal2` / `metal3` signal routing channels |
 | Thick red vertical stripes | `metal4` VDD power supply |
 | Thick blue horizontal stripes | `metal5` VSS ground supply |
-| Numbers "1837", "2146" | OpenROAD ruler measurements (distance in db units, 1 unit = 5nm) |
-| Ruler: 1837 units | 1837 × 5nm = **9.185 µm** distance |
 
 ---
 
-### 8.2 NanGate 45nm — Zoomed In (DFF_X1 Cell, NFSR Bit 102)
+### 8.2 NanGate 45nm — OpenROAD GUI & Inspector View (Instance 2093 DFF_X1)
 
-![45nm DFF Standard Cell Zoomed](docs/images/openroad_45nm_dff_cell_layout.png)
+![OpenROAD GUI Overview](./docs/images/openroad_45nm_gui_overview.png)
 
-#### Inspector Panel (Right Side) — Cell `_2146_`
+#### Inspector Panel (Right Side) — Cell `2093` (`DFF_X1`)
 
 | Inspector Field | Value | Meaning |
 |:---|:---|:---|
 | **Type** | `Inst` | Physical standard cell instance |
-| **Name** | `_2146_` | Internal OpenROAD cell index |
+| **Name** | `2093` | Internal OpenROAD cell index |
 | **Block** | `lfsr_nfsr_top` | Top-level module |
-| **Master** | `DFF_X1` | NanGate 45nm D-Flip-Flop, 1× drive strength |
-| **Placement status** | `PLACED` ✅ | Legally placed in a site row |
+| **Master** | `DFF_X1` | NanGate 45nm D-Flip-Flop |
+| **Placement status** | `PLACED` ✅ | Legally placed in core row |
 | **Orientation** | `MX` | Mirrored in X (standard cell row alternation) |
-| **X** | `56.81 µm` | Physical X-coordinate on silicon |
-| **Y** | `60.2 µm` | Physical Y-coordinate on silicon |
-| **Q (output)** | `nfsr_inst.N[102]` | **Stores NFSR Bit 102** |
+| **X / Y** | `50.16 µm / 77 µm` | Physical coordinates on silicon |
+| **Q (output)** | `nfsr_inst.N[49]` | Stores NFSR Bit 49 |
 | **CK (clock)** | `clk` | Connected to master clock tree |
-| **D (data)** | `_0705_` | Wired to combinational feedback |
-| **VDD / VSS** | `VDD / VSS` | 1.1V / 0V power rails |
-| **BBox** | `(56.81,60.2)–(60.04,61.6)` | Cell is **3.23 µm wide × 1.4 µm tall** |
-
-#### Layer Color Legend
-
-| Color | Layer | Purpose |
-|:---|:---|:---|
-| Dark blue/purple shapes | `poly`, `diffusion` | Transistor gates & source/drain |
-| Bright red tracks | `metal1` | Dense local signal routing (D, Q, CK pins) |
-| Blue lines | `metal2`, `metal3` | Regional signal routing |
-| Thick red stripes | `metal4` | Vertical VDD power |
-| Thick blue stripes | `metal5` | Horizontal VSS ground |
-| Small colored squares | `via1`, `via2`, etc. | Layer-to-layer metal connections |
-| Scale bar: 0–400nm | — | Sub-micron geometry visualization |
-
-#### What are the dark blue shapes inside?
-Those are the actual **CMOS transistor geometries** at 45nm: PMOS and NMOS transistors forming a master-slave D-flip-flop (~20 transistors) that stores exactly **1 bit of your NFSR state**. Each transistor gate is only ~45nm wide — below the wavelength of visible light (380nm).
+| **D (data)** | `_0758_` | Wired to combinational feedback |
 
 ---
 
-### 8.3 SkyWater 130nm — Full Chip View (Baseline Comparison)
+### 8.3 NanGate 45nm — Top Signal Pins & Timing Report View
 
-![130nm Full Chip Layout](docs/images/openroad_130nm_full_chip.png)
+![Top Pins and Timing Report](./docs/images/openroad_45nm_pins_timing.png)
 
-The 130nm baseline layout is **visually larger** for the same logic because:
-- Transistor feature size is 2.9× larger (130nm vs 45nm)
-- Bit-serial architecture uses far fewer cells (~300 vs 1,106), but each cell is physically bigger
-- No 8-step unrolling, so the combinational logic block is minimal
+Shows top-edge I/O pins (`ciphertext[0:7]`, `plaintext[0:7]`, `clk`, `rst`, `enable`) connected to the internal logic blocks via `metal3` and `metal2` vertical routing tracks.
 
-This is the reference design that our 45nm parallel design beats by **2.5× smaller area** and **25× lower energy per encryption**.
+---
+
+### 8.4 NanGate 45nm — Detailed Gate & Routing Layers (`MUX2_X1` Instance 1914)
+
+![Zoomed Gate Layout and Routing](./docs/images/openroad_45nm_zoomed_gate_detail.png)
+
+Shows microscopic nanometer-scale view of standard cell instance `1914` (`MUX2_X1`), showing Metal 1 red tracks, Metal 2 green tracks, Metal 3 blue tracks, and layer transition vias.
 
 ---
 
