@@ -688,7 +688,7 @@ Expected: 1,106 cells, area 2,375.91 µm² (see Section 9.2 for full output).
 ```bash
 docker run --rm \
     -v "$PWD":/work \
-    -v /home/jeevan/vlsi_libraries:/home/jeevan/vlsi_libraries \
+    -v vlsi_libraries:vlsi_libraries \
     -w /work \
     efabless/openlane:2023.09.07 \
     openroad flow_45nm_128bit/openroad_pnr_128bit.tcl

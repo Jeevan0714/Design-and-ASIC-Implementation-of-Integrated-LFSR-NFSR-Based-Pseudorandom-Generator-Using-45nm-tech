@@ -2,7 +2,7 @@
 # OpenSTA Static Timing Analysis — Grain-128 LFSR-NFSR 128-bit (NanGate 45nm)
 # -----------------------------------------------------------------------------
 
-read_liberty /home/jeevan/vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib
+read_liberty vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib
 read_verilog flow_45nm_128bit/results/synth_netlist_128bit.v
 link_design  lfsr_nfsr_top
 read_sdc     flow_45nm_128bit/constraints.sdc

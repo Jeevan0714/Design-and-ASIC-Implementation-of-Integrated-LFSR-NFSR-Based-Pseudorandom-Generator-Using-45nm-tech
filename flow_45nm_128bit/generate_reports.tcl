@@ -10,7 +10,7 @@
 set DESIGN     lfsr_nfsr_top
 set NETLIST    flow_45nm_128bit/results/synth_netlist_128bit.v
 set SDC        flow_45nm_128bit/constraints.sdc
-set LIB        /home/jeevan/vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib
+set LIB        vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib
 
 set RPT_DIR    flow_45nm_128bit/reports
 
