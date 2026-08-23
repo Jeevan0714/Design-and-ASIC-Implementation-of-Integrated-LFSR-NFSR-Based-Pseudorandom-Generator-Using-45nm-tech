@@ -17,8 +17,13 @@
 9. [Q9: What if the builder or fabricator hardcodes the Secret Key in silicon?](#q9-what-if-the-builder-or-fabricator-hardcodes-the-secret-key-in-silicon)
 10. [Q10: Can an attacker hack all devices if they extract one Secret Key?](#q10-can-an-attacker-hack-all-devices-if-they-extract-one-secret-key)
 11. [Q11: How do sender and receiver decode data if every chip has a unique key?](#q11-how-do-sender-and-receiver-decode-data-if-every-chip-has-a-unique-key)
-12. [Q12: How does Bluetooth pair dynamically without pre-built hardcoded keys?](#q12-how-does-bluetooth-pair-dynamically-without-pre-built-hardcoded-keys)
+12: [Q12: How does Bluetooth pair dynamically without pre-built hardcoded keys?](#q12-how-does-bluetooth-pair-dynamically-without-pre-built-hardcoded-keys)
 13. [Q13: How do passive battery-less RFID tags exchange keys with a reader?](#q13-how-do-passive-battery-less-rfid-tags-exchange-keys-with-a-reader)
+14. [Q14: How does Decryption (Decoding) recover the exact original character?](#q14-how-does-decryption-decoding-recover-the-exact-original-character)
+15. [Q15: How does the Keystream and Ciphertext change for the 2nd byte (2nd letter)?](#q15-how-does-the-keystream-and-ciphertext-change-for-the-2nd-byte-2nd-letter)
+16. [Q16: How does the entire 128-bit state vector (`s` and `b`) shift across bytes?](#q16-how-does-the-entire-128-bit-state-vector-s-and-b-shift-across-bytes)
+17. [Q17: How are the 128-bit registers (`s` and `b`) loaded from the Secret Key & IV?](#q17-how-are-the-128-bit-registers-s-and-b-loaded-from-the-secret-key--iv)
+18. [Q18: What is the exact mathematical formula for the `h(x)` filter function?](#q18-what-is-the-exact-mathematical-formula-for-the-hx-filter-function)
 
 ---
 
@@ -69,8 +74,8 @@ State 0 (S0): Initial Register Taps       ──► Generates Z[7] (MSB)
 State 1 (S1): Shifted by +1 Position      ──► Generates Z[6]
 ```
 
-- **`Z[7]` (State `S0`)**: Evaluates `h(x)` using initial taps (`s124, s102, s81, s63, s57, b118, b87, b75, b39`). Term 4 is `(1·1) = 1`, resulting in `h(x) = 1`.
-- **`Z[6]` (State `S1`)**: Evaluates `h(x)` after all register bits shift forward by 1 position (`s125, s103, s82, s64, s58, b119, b88, b76, b40`). Terms 2, 3, 5 become `1`, resulting in a different XOR combination!
+- **`Z[7]` (State `S0`)**: Evaluates `h(x)` using initial taps (`s124, s102, s81, s63, s57, b118, b87, b79, b39`). Term 4 is `(1·1) = 1`, resulting in `h(x) = 1`.
+- **`Z[6]` (State `S1`)**: Evaluates `h(x)` after all register bits shift forward by 1 position. Terms 2, 3, 5 become `1`, resulting in `h(x) = 1`.
 
 > 💡 **Viva Summary**: *"Our 8-bit parallel architecture computes 8 consecutive shift states (`S0` to `S7`) in 1 clock cycle. Because register bits move down by 1 position per state, the 5 AND-product terms of `h(x)` receive different bit values."*
 
@@ -119,7 +124,7 @@ Conversely, looking at Tap Index 124:
    An attacker **cannot reverse-engineer the 128-bit Secret Key** because of Grain-128's **nonlinear NFSR feedback** and 5-term **`h(x)` filter function** (degree-3 terms). Reversing these non-linear Boolean equations requires $2^{128}$ operations (billions of years).
 3. **Preventing Keystream Reuse (IV Refresh)**:
    Grain-128 mixes a **fresh Initial Vector (IV / Nonce)** into the starting register seeds for every new message:
-   $$\text{Initial State} = \text{Secret Key (128 bits)} + \text{Fresh IV (96 bits)}$$
+   `Initial State = Secret Key (128 bits) + Fresh IV (96 bits)`
    Even with the same Key, a new IV generates a 100% unique keystream, rendering past captured keystreams useless.
 
 > 💡 **Viva Summary**: *"Intercepting a keystream only decrypts that single transmission. The high algebraic immunity of `h(x)` prevents key recovery, and fresh IVs per message prevent keystream reuse attacks."*
@@ -136,11 +141,11 @@ Conversely, looking at Tap Index 124:
    - Intercepted Public IV: `0x123456789ABCDEF0123456789ABCDEF0`
    - Intercepted Ciphertext Byte ($C_0$): `0xC8` (`11001000`)
 2. **Recompute Keystream ($Z_0$)**:
-   Hacker loads Key & IV into their Grain-128 script $\rightarrow$ computes $h(x) = 1$ $\rightarrow$ generates $Z_0 = \mathbf{0x80}$ (`10000000`).
+   Hacker loads Key & IV into their Grain-128 script → computes $h(x) = 1$ → generates $Z_0 = \mathbf{0x80}$ (`10000000`).
 3. **Apply XOR Decryption Rule**:
-   $$P_0 = C_0 \oplus Z_0 = 11001000 \oplus 10000000 = \mathbf{01001000}$$
+   `P0 = C0 ⊕ Z0 = 11001000 ⊕ 10000000 = 01001000`
 4. **Convert Binary to Text**:
-   $$\text{Binary } 01001000 \longrightarrow \text{Decimal } 72 \longrightarrow \text{ASCII Character } \mathbf{'H'}$$
+   `Binary 01001000 ──► Decimal 72 ──► ASCII Character 'H'`
 
 ---
 
@@ -222,7 +227,99 @@ Passive RFID tags have no battery or screen to perform a 4-second Bluetooth hand
    The tag broadcasts its public serial ID (`"Card #8812"`). The reader looks up `"Card #8812"` in a secure database, retrieves Key `K_8812`, and authenticates via Grain-128.
 2. **Master Key Derivation KDF (Offline Hotel Room Doors)**:
    The door reader knows a **Master Secret Key (`K_master`)**. When you tap your card, the reader reads your Card UID and derives your card's key on the fly:
-   $$\text{Card Key } K_{\text{card}} = \text{Grain-128}(\text{Master Key } K_{\text{master}}, \text{Card UID})$$
+   `Card Key K_card = Grain-128(Master Key K_master, Card UID)`
+
+---
+
+### Q14: How does Decryption (Decoding) recover the exact original character?
+
+**Answer:**  
+Decryption works because **Bitwise XOR is a mathematical self-inverse operation (`A ⊕ B ⊕ B = A`)**:
+
+1. **Encoding (Encryption)**:  
+   `Ciphertext C = Plaintext P ⊕ Keystream Z`
+2. **Decoding (Decryption)**:  
+   `Recovered P = Ciphertext C ⊕ Keystream Z`
+
+Substituting `C` into the decoding equation:
+`Recovered P = (Plaintext P ⊕ Keystream Z) ⊕ Keystream Z`  
+`Recovered P = Plaintext P ⊕ (Keystream Z ⊕ Keystream Z)`  
+Since any bit XORed with itself cancels to zero (`Z ⊕ Z = 0`):  
+`Recovered P = Plaintext P ⊕ 0 = Plaintext P`
+
+#### Numerical Example (Character `'H'`):
+* **Plaintext `'H'`**: `01001000` (`0x48`)
+* **Keystream Byte**: `10000000` (`0x80`)
+* **Encoding**: `01001000 ⊕ 10000000 = 11001000` (`0xC8`)
+* **Decoding**: `11001000 ⊕ 10000000 = 01001000` (`0x48` = `'H'`)
+
+> 💡 **Viva Summary**: *"Bitwise XOR is self-inverse (`A ⊕ B ⊕ B = A`). When the receiver XORs the ciphertext with the identical keystream byte, the keystream bits cancel out to 0, recovering the original ASCII character."*
+
+---
+
+### Q15: How does the Keystream and Ciphertext change for the 2nd byte (2nd letter)?
+
+**Answer:**  
+When encrypting a 2-letter word (e.g. `"HI"` or `"HA"`):
+
+1. **Keystream Advances by 8 Steps**:  
+   For the 1st letter (`'H'`), the cipher evaluates States `S0..S7`, producing Keystream Byte 1 = **`10000000` (`0x80`)**.  
+   For the 2nd letter (`'I'`), the cipher registers advance 8 clock steps to States `S8..S15`, producing Keystream Byte 2 = **`01111010` (`0x7A`)**.
+
+2. **Bitwise XOR for Word `"HI"`**:
+   - **1st Letter `'H'`** (`0x48`): `01001000 ⊕ 10000000` → **`11001000` (`0xC8`)**
+   - **2nd Letter `'I'`** (`0x49`): `01001001 ⊕ 01111010` → **`00110011` (`0x33`)**
+
+> 💡 **Viva Summary**: *"Each character position in a message gets its own unique keystream byte because the shift registers advance by 8 clocks per character (`0x80` for Byte 1, `0x7A` for Byte 2)."*
+
+---
+
+### Q16: How does the entire 128-bit state vector (`s` and `b`) shift across bytes?
+
+**Answer:**  
+At every clock step, the 128-bit LFSR vector (`s`) and 128-bit NFSR vector (`b`) shift by 1 position. For 1 full byte (8 clock steps), the entire 128-bit state vector updates as follows:
+
+1. **Upper 120 Bits (`s127..s8` & `b127..b8`) Shift Left by 8 Positions**:  
+   Every position `i` (for `i ≥ 8`) receives the bit value that was sitting at index `i - 8` in Byte 1:
+   - `s127 (Byte 2) = s119 (Byte 1)`
+   - `s124 (Byte 2) = s116 (Byte 1)`
+   - `s102 (Byte 2) = s94 (Byte 1)`
+   - `b118 (Byte 2) = b110 (Byte 1)`
+2. **Lowest 8 Bits (`s7..s0` & `b7..b0`) Receive New Feedback**:  
+   Indices 0 through 7 are filled with the 8 newly calculated feedback bits (`Lfb0..Lfb7` and `Nfb0..Nfb7`) computed during Byte 1.
+
+> 💡 **Viva Summary**: *"For every byte encrypted, the entire 128-bit state array shifts left by 8 positions, and indices 0..7 are filled with 8 new feedback bits."*
+
+---
+
+### Q17: How are the 128-bit registers (`s` and `b`) loaded from the Secret Key & IV?
+
+**Answer:**  
+In Grain-128, the 128-bit state registers are loaded directly from Hexadecimal strings (where each hex character maps to 4 binary bits):
+
+1. **NFSR Register (`b`)**: Loaded with the **128-bit Secret Key** (`123456789ABCDEF0123456789ABCDEF0`).  
+   - Hex `1` → `0001` → `b127=0, b126=0, b125=0, b124=1`
+   - Hex `2` → `0010` → `b123=0, b122=0, b121=1, b120=0`
+2. **LFSR Register (`s`)**: Loaded with the **96-bit IV** + 32 padding ones (`ACE123456789ABCDEF0123456789ABCE`).  
+   - Hex `A` → `1010` → `s127=1, s126=0, s125=1, s124=0`
+   - Hex `C` → `1100` → `s123=1, s122=1, s121=0, s120=0`
+
+> 💡 **Viva Summary**: *"Each hex character maps to 4 binary bits. The 128-bit Secret Key is written into the NFSR (`b`), while the 96-bit IV + padding is written into the LFSR (`s`)."*
+
+---
+
+### Q18: What is the exact mathematical formula for the `h(x)` filter function?
+
+**Answer:**  
+The non-linear filter function `h(x)` samples 5 LFSR taps (`s`) and 4 NFSR taps (`b`):
+
+`h(x) = (x0 · x1) ⊕ (x2 · x3) ⊕ (x4 · x5) ⊕ (x6 · x7) ⊕ (x0 · x4 · x8)`
+
+Substituting the 9 tap registers:
+`h(x) = (s124 · s102) ⊕ (s81 · s63) ⊕ (s57 · b118) ⊕ (b87 · b79) ⊕ (s124 · s57 · b39)`
+
+- **Degree**: Non-linear algebraic degree of 3 (Term 5 = `s124 · s57 · b39`).
+- **Cryptographic Role**: Ensures high algebraic immunity to prevent algebraic state recovery attacks.
 
 ---
 
@@ -237,4 +334,8 @@ Passive RFID tags have no battery or screen to perform a 4-second Bluetooth hand
 | **Device Security** | Every device pair has a unique 128-bit key. Hacking 1 chip does not compromise others. |
 | **Bluetooth Pairing** | Uses ECDH public-key handshake to derive 128-bit key on the fly, then runs Grain-128. |
 | **RFID Operation** | Uses central database key lookup by Card UID or local Master Key Derivation (KDF). |
-
+| **Decryption Proof** | XOR self-inverse ($A \oplus B \oplus B = A$). Receiver XORs ciphertext with matching keystream to recover $P$. |
+| **2nd Byte Keystream** | Registers advance 8 steps ($S_8 \dots S_{15}$), producing 2nd keystream byte `0x7A` (`01111010`). |
+| **128-Bit Register Shift**| Upper 120 bits shift left by 8 positions ($i \to i-8$); indices 0..7 receive new feedback bits. |
+| **Key/IV Loading** | Hex digits convert to 4 bits each. Secret Key populates NFSR (`b`), IV + padding populates LFSR (`s`). |
+| **`h(x)` Formula** | `h(x) = (s124·s102) ⊕ (s81·s63) ⊕ (s57·b118) ⊕ (b87·b79) ⊕ (s124·s57·b39)`. Degree-3 non-linearity. |

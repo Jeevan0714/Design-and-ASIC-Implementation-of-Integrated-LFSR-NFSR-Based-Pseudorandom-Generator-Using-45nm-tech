@@ -4,9 +4,9 @@
 # -----------------------------------------------------------------------------
 
 # 1. Read NanGate 45nm PDK Libraries
-read_lef     /home/jeevan/vlsi_libraries/nangate45/NangateOpenCellLibrary.tech.lef
-read_lef     /home/jeevan/vlsi_libraries/nangate45/NangateOpenCellLibrary.lef
-read_liberty /home/jeevan/vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib
+read_lef     vlsi_libraries/nangate45/NangateOpenCellLibrary.tech.lef
+read_lef     vlsi_libraries/nangate45/NangateOpenCellLibrary.lef
+read_liberty vlsi_libraries/nangate45/NangateOpenCellLibrary_typical.lib
 
 # 2. Read Synthesised Netlist and SDC Constraints
 read_verilog flow_45nm_128bit/results/synth_netlist_128bit.v
