@@ -165,7 +165,7 @@ function renderP3() {
     document.getElementById('lfsr-tap-list').innerText = 
         `s124 = ${d.s124} | s102 = ${d.s102} | s81 = ${d.s81} | s63 = ${d.s63} | s57 = ${d.s57} | s34 = ${d.s34}`;
     document.getElementById('nfsr-tap-list').innerText = 
-        `b125 = ${d.b125} | b118 = ${d.b118} | b112 = ${d.b112} | b91 = ${d.b91} | b87 = ${d.b87} | b79 = ${d.b79} | b63 = ${d.b63n} | b54 = ${d.b54} | b39 = ${d.b39} | b38 = ${d.b38}`;
+        `b125 = ${d.b125} | b118 = ${d.b118} | b112 = ${d.b112} | b91 = ${d.b91} | b87 = ${d.b87} | b82 = ${d.b82} | b79 = ${d.b79} | b63 = ${d.b63n} | b54 = ${d.b54} | b39 = ${d.b39} | b38 = ${d.b38}`;
 }
 
 // Step 4
