@@ -372,6 +372,11 @@
                             </tr>
                         </tbody>
                     </table>
+                <!-- Table 2b: 8-Bit Parallel Register Shift Equations -->
+                <div class="deriv-step" style="margin-top: 16px;">
+                    <div class="deriv-label">⚡ Verilog 8-Bit Parallel Register State Advances (L_next & N_next)</div>
+                    <div class="deriv-code" style="color: #38bdf8; font-weight: 600;">assign L_next = { L[119:0], Lfb7, Lfb6, Lfb5, Lfb4, Lfb3, Lfb2, Lfb1, Lfb0 };</div>
+                    <div class="deriv-code" style="color: #a855f7; font-weight: 600; margin-top: 6px;">assign N_next = { N[119:0], Nfb7, Nfb6, Nfb5, Nfb4, Nfb3, Nfb2, Nfb1, Nfb0 };</div>
                 </div>
 
                 <!-- Table 3: Non-Linear Filter Function h(x) Taps -->

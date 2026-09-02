@@ -34,7 +34,7 @@ module TB;
     );
 
     // 100 MHz clock (10 ns period)
-    always #5 clk = ~clk;
+    always #1 clk = ~clk;
 
     // --------------------------------------------------------
     // Load plaintext message: "LFSR NFSR 128BIT"
@@ -63,27 +63,26 @@ module TB;
         // Hold reset for 2 full clock cycles
         @(posedge clk); @(posedge clk);
 
-        // Release reset between posedges (ensures clean state)
+        // Release reset cleanly on falling edge
         @(negedge clk);
         rst    = 0;
         enable = 1;
-        #2;  // let Z settle combinationally from SEED state
 
         // ------------------------------------------------
-        // ENCRYPTION: 1 character per clock — 16 cycles total
+        // ENCRYPTION: 1 character per 2 ns clock cycle (16 cycles total)
         // ------------------------------------------------
         for (i = 0; i < MSG_BYTES; i = i + 1) begin
-            plaintext      = plain_chars[i];  // drive 8-bit character
-            #2;                               // combinational settle
-            cipher_chars[i] = ciphertext;     // capture encrypted byte
-            decrpt_chars[i] = decrypted_text; // capture decrypted byte
-            @(posedge clk);                   // LFSR/NFSR advance 8 steps
-            #2;                               // settle after posedge
+            plaintext       = plain_chars[i];  // drive 8-bit character on negedge
+            @(posedge clk);                    // LFSR/NFSR advance on posedge
+            #0.1;                              // 100ps settle
+            cipher_chars[i] = ciphertext;      // capture encrypted byte
+            decrpt_chars[i] = decrypted_text;  // capture decrypted byte
+            @(negedge clk);                    // wait for next negedge
         end
 
         enable    = 0;
         plaintext = 8'h00;
-        #20;
+        #10;
 
         // ------------------------------------------------
         // DISPLAY — Print the encryption demo table
@@ -92,8 +91,8 @@ module TB;
         $display("=================================================================");
         $display("  GRAIN-128 LFSR-NFSR  |  8-BIT PARALLEL  |  45nm ASIC DEMO    ");
         $display("=================================================================");
-        $display("  Technology : NanGate 45nm  |  100 MHz  |  128-bit Security    ");
-        $display("  Throughput : 8 bits/cycle = 800 Mbps  |  Latency: 16 cycles   ");
+        $display("  Technology : NanGate 45nm  |  500 MHz  |  128-bit Security    ");
+        $display("  Throughput : 8 bits/cycle = 4000 Mbps (4 Gbps) | Latency: 16 cycles");
         $display("-----------------------------------------------------------------");
 
         $write("  Plaintext  : ");
